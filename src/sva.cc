@@ -129,7 +129,7 @@ static std::vector<AssertionMatch> synthesizeAssertionExpr(EvalContext& eval, co
 		case slang::ast::AssertionExprKind::Simple:
 			{
 				const auto& simple = expr.as<ast::SimpleAssertionExpr>();
-				return {{ eval, simple.isNullExpr ? false : eval(simple.expr) }};
+				return {{ eval, simple.isNullExpr ? false : eval.sva(simple.expr) }};
 			}
 		case slang::ast::AssertionExprKind::SequenceConcat:
 			{
@@ -229,7 +229,7 @@ static std::vector<AssertionMatch> synthesizeAssertionExpr(EvalContext& eval, co
 		case slang::ast::AssertionExprKind::DisableIff:
 			{
 				const auto& disableiff = expr.as<ast::DisableIffAssertionExpr>();
-				auto disable = (AssertionMatch) {eval, eval(disableiff.condition)};
+				auto disable = (AssertionMatch) {eval, eval.sva(disableiff.condition)};
 				auto inner = synthesizeAssertionExpr(eval, disableiff.expr);
 				std::vector<AssertionMatch> disables;
 				disables.push_back(disable);
