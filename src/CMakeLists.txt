@@ -32,6 +32,7 @@ add_library(yosys-slang ${LIBRARY_TYPE}
     memory.h
     naming.cc
     procedural.cc
+    pir_builder.cc
     slang_frontend.cc
     slang_frontend.h
     statements.h
