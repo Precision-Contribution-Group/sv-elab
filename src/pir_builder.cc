@@ -62,4 +62,6 @@ void AssertAssumeRestrictProperty::build(std::stringstream &stream)
 	if (evaluate != std::nullopt) {
 		stream << " :evaluate " << to_string(*evaluate);
 	}
+
+    stream << ")";
 }
