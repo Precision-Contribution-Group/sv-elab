@@ -33,9 +33,11 @@ struct Statement : public Type
 	using Ptr = std::shared_ptr<Statement>;
 };
 
-struct Declare : public Statement
+struct DeclareStatement : public Statement
 {
-	Declare(const std::string &identifier, const Expression::Ptr &expression);
+	DeclareStatement(const std::string &identifier, const Expression::Ptr &expression);
+
+	void build(std::stringstream &stream);
 
 private:
 	std::string identifier;
@@ -54,11 +56,16 @@ enum CoverMode {
 	Nonvacuous,
 };
 
+enum CoverKind {
+	Property,
+	Sequence,
+};
+
 enum PropertyMethod { Assert, Assume, Restrict };
 
-struct AssertAssumeRestrictProperty : public Statement
+struct AssertAssumeRestrictPropertyStatement : public Statement
 {
-	AssertAssumeRestrictProperty(const PropertyMethod &method, const std::string &clk_prop,
+	AssertAssumeRestrictPropertyStatement(const PropertyMethod &method, const std::string &clk_prop,
 			const std::optional<bool> disable_iff = std::nullopt,
 			const std::optional<bool> enable = std::nullopt,
 			const std::optional<Evaluate> &evaluate = std::nullopt)
@@ -69,11 +76,33 @@ struct AssertAssumeRestrictProperty : public Statement
 	void build(std::stringstream &stream);
 
 private:
-	PropertyMethod method;
+	const PropertyMethod method;
 	const std::string &clk_prop;
 	const std::optional<bool> disable_iff;
 	const std::optional<bool> enable;
 	const std::optional<Evaluate> evaluate;
+};
+
+struct CoverStatement : public Statement
+{
+	CoverStatement(const CoverKind &kind, const std::string &clk_prop,
+			const std::optional<bool> disable_iff = std::nullopt,
+			const std::optional<bool> enable = std::nullopt,
+			const std::optional<Evaluate> &evaluate = std::nullopt,
+			const std::optional<CoverMode> &mode = std::nullopt)
+		: kind(kind), clk_prop(clk_prop), disable_iff(disable_iff), enable(enable),
+		  evaluate(evaluate), mode(mode)
+	{}
+
+	void build(std::stringstream &stream);
+
+private:
+	const CoverKind kind;
+	const std::string &clk_prop;
+	const std::optional<bool> disable_iff;
+	const std::optional<bool> enable;
+	const std::optional<Evaluate> evaluate;
+	const std::optional<CoverMode> mode;
 };
 
 }; // namespace pir

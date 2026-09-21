@@ -33,13 +33,19 @@ std::string to_string(const CoverMode &mode)
 	return "pir_builder_internal_error";
 }
 
-Declare::Declare(const std::string &identifier, const Expression::Ptr &expression)
+DeclareStatement::DeclareStatement(const std::string &identifier, const Expression::Ptr &expression)
 {
 	this->identifier = identifier;
 	this->expr = expression;
 }
 
-void AssertAssumeRestrictProperty::build(std::stringstream &stream)
+void DeclareStatement::build(std::stringstream &stream) {
+	stream << "(declare " << identifier << " ";
+	expr->build(stream);
+	stream << ")";
+}
+
+void AssertAssumeRestrictPropertyStatement::build(std::stringstream &stream)
 {
 	stream << "(";
 
@@ -64,4 +70,33 @@ void AssertAssumeRestrictProperty::build(std::stringstream &stream)
 	}
 
     stream << ")";
+}
+
+void CoverStatement::build(std::stringstream &stream) {
+	stream << "(cover-";
+
+	switch (kind) {
+		case Property : stream << "property"; break;
+		case Sequence : stream << "sequence"; break;
+	}
+
+	stream << " " << clk_prop;
+
+	if (disable_iff != std::nullopt) {
+		stream << " :disable-iff " << *disable_iff;
+	}
+
+	if (enable != std::nullopt) {
+		stream << " :enable " << *enable;
+	}
+
+	if (evaluate != std::nullopt) {
+		stream << " :evaluate " << to_string(*evaluate);
+	}
+
+	if (mode != std::nullopt) {
+		stream << " :mode " << to_string(*mode);
+	}
+
+	stream << ")";
 }
