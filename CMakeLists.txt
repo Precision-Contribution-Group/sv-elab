@@ -78,22 +78,3 @@ add_subdirectory(src)
 
 enable_testing()
 add_subdirectory(tests)
-
-option(USE_EXTERNAL_Catch2 "Build with external Catch2 library" OFF)
-if (USE_EXTERNAL_Catch2)
-    find_package(Catch2 3 CONFIG QUIET)
-endif()
-
-if (Catch2_FOUND)
-    message(STATUS "Using external Catch2")
-else()
-    message(STATUS "Using bundled third_party/Catch2")
-
-    option(Catch2_INSTALL OFF)
-    FetchContent_Declare(
-        Catch2
-        EXCLUDE_FROM_ALL
-        SOURCE_DIR ${CMAKE_SOURCE_DIR}/third_party/Catch2
-    )
-    FetchContent_MakeAvailable(Catch2)
-endif()
