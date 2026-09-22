@@ -103,7 +103,8 @@ else()
     FetchContent_MakeAvailable(Catch2)
 endif()
 
-add_executable(pir-builder-tests test/test_pir_builder.cc)
+add_executable(pir-builder-tests test/test_pir_builder.cc pir_builder.cc pir_builder.h)
+target_include_directories(pir-builder-tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(pir-builder-tests PRIVATE Catch2::Catch2WithMain)
 
 # Enable registration of tests with CTest

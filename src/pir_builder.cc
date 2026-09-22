@@ -8,17 +8,19 @@
 // https://github.com/YosysHQ/property-ir/)
 
 #include "pir_builder.h"
+#include <iostream>
 #include <optional>
 #include <sstream>
 #include <string>
 
 using namespace pir;
 
+namespace {
 std::string to_string(const Evaluate &evaluate)
 {
 	switch (evaluate) {
-	case EvaluateAlways:  return "always";
-	case EvaluateInitial: return "initial";
+	case Evaluate::EvaluateAlways:  return "always";
+	case Evaluate::EvaluateInitial: return "initial";
 	}
 	return "pir_builder_internal_error";
 }
@@ -26,20 +28,20 @@ std::string to_string(const Evaluate &evaluate)
 std::string to_string(const CoverMode &mode)
 {
 	switch (mode) {
-	case Satisfied:             return "satisfied";
-	case NonvacuouslySatisfied: return "nonvacuously-satisfied";
-	case Nonvacuous:            return "nonvacuous";
+	case CoverMode::Satisfied:             return "satisfied";
+	case CoverMode::NonvacuouslySatisfied: return "nonvacuously-satisfied";
+	case CoverMode::Nonvacuous:            return "nonvacuous";
 	}
 	return "pir_builder_internal_error";
 }
+}; // namespace
 
-DeclareStatement::DeclareStatement(const std::string &identifier, const Expression::Ptr &expression)
+DeclareStatement::DeclareStatement(std::string identifier, Expression::Ptr expression)
+	: identifier(std::move(identifier)), expr(std::move(expression))
+{}
+
+void DeclareStatement::build(std::stringstream &stream)
 {
-	this->identifier = identifier;
-	this->expr = expression;
-}
-
-void DeclareStatement::build(std::stringstream &stream) {
 	stream << "(declare " << identifier << " ";
 	expr->build(stream);
 	stream << ")";
@@ -50,12 +52,14 @@ void AssertAssumeRestrictPropertyStatement::build(std::stringstream &stream)
 	stream << "(";
 
 	switch (method) {
-	case Assert:   stream << "assert-"; break;
-	case Assume:   stream << "assume-"; break;
-	case Restrict: stream << "restrict-"; break;
+	case PropertyMethod::Assert:   stream << "assert-"; break;
+	case PropertyMethod::Assume:   stream << "assume-"; break;
+	case PropertyMethod::Restrict: stream << "restrict-"; break;
 	}
 
 	stream << "property " << clk_prop;
+	// we always want boolalpha, so no need to turn it off
+	stream << std::boolalpha;
 
 	if (disable_iff != std::nullopt) {
 		stream << " :disable-iff " << *disable_iff;
@@ -69,18 +73,22 @@ void AssertAssumeRestrictPropertyStatement::build(std::stringstream &stream)
 		stream << " :evaluate " << to_string(*evaluate);
 	}
 
-    stream << ")";
+	stream << ")";
 }
 
-void CoverStatement::build(std::stringstream &stream) {
+void CoverStatement::build(std::stringstream &stream)
+{
 	stream << "(cover-";
 
 	switch (kind) {
-		case Property : stream << "property"; break;
-		case Sequence : stream << "sequence"; break;
+	case CoverKind::Property: stream << "property"; break;
+	case CoverKind::Sequence: stream << "sequence"; break;
 	}
 
 	stream << " " << clk_prop;
+
+	// we always want boolalpha, so no need to turn it off
+	stream << std::boolalpha;
 
 	if (disable_iff != std::nullopt) {
 		stream << " :disable-iff " << *disable_iff;

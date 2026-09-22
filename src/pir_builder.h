@@ -11,6 +11,7 @@
 #include <optional>
 #include <sstream>
 #include <string>
+#include <utility>
 
 namespace pir {
 
@@ -35,9 +36,9 @@ struct Statement : public Type
 
 struct DeclareStatement : public Statement
 {
-	DeclareStatement(const std::string &identifier, const Expression::Ptr &expression);
+	DeclareStatement(std::string identifier, Expression::Ptr expression);
 
-	void build(std::stringstream &stream);
+	void build(std::stringstream &stream) override;
 
 private:
 	std::string identifier;
@@ -45,64 +46,64 @@ private:
 };
 
 /// The evaluate argument. This is not in and of itself a type.
-enum Evaluate {
+enum class Evaluate {
 	EvaluateAlways,
 	EvaluateInitial,
 };
 
-enum CoverMode {
+enum class CoverMode {
 	Satisfied,
 	NonvacuouslySatisfied,
 	Nonvacuous,
 };
 
-enum CoverKind {
+enum class CoverKind {
 	Property,
 	Sequence,
 };
 
-enum PropertyMethod { Assert, Assume, Restrict };
+enum class PropertyMethod { Assert, Assume, Restrict };
 
 struct AssertAssumeRestrictPropertyStatement : public Statement
 {
-	AssertAssumeRestrictPropertyStatement(const PropertyMethod &method, const std::string &clk_prop,
+	AssertAssumeRestrictPropertyStatement(const PropertyMethod &method, std::string clk_prop,
 			const std::optional<bool> disable_iff = std::nullopt,
 			const std::optional<bool> enable = std::nullopt,
 			const std::optional<Evaluate> &evaluate = std::nullopt)
-		: method(method), clk_prop(clk_prop), disable_iff(disable_iff), enable(enable),
+		: method(method), clk_prop(std::move(clk_prop)), disable_iff(disable_iff), enable(enable),
 		  evaluate(evaluate)
 	{}
 
-	void build(std::stringstream &stream);
+	void build(std::stringstream &stream) override;
 
 private:
-	const PropertyMethod method;
-	const std::string &clk_prop;
-	const std::optional<bool> disable_iff;
-	const std::optional<bool> enable;
-	const std::optional<Evaluate> evaluate;
+	PropertyMethod method;
+	std::string clk_prop;
+	std::optional<bool> disable_iff;
+	std::optional<bool> enable;
+	std::optional<Evaluate> evaluate;
 };
 
 struct CoverStatement : public Statement
 {
-	CoverStatement(const CoverKind &kind, const std::string &clk_prop,
+	CoverStatement(const CoverKind &kind, std::string clk_prop,
 			const std::optional<bool> disable_iff = std::nullopt,
 			const std::optional<bool> enable = std::nullopt,
 			const std::optional<Evaluate> &evaluate = std::nullopt,
 			const std::optional<CoverMode> &mode = std::nullopt)
-		: kind(kind), clk_prop(clk_prop), disable_iff(disable_iff), enable(enable),
+		: kind(kind), clk_prop(std::move(clk_prop)), disable_iff(disable_iff), enable(enable),
 		  evaluate(evaluate), mode(mode)
 	{}
 
-	void build(std::stringstream &stream);
+	void build(std::stringstream &stream) override;
 
 private:
-	const CoverKind kind;
-	const std::string &clk_prop;
-	const std::optional<bool> disable_iff;
-	const std::optional<bool> enable;
-	const std::optional<Evaluate> evaluate;
-	const std::optional<CoverMode> mode;
+	CoverKind kind;
+	std::string clk_prop;
+	std::optional<bool> disable_iff;
+	std::optional<bool> enable;
+	std::optional<Evaluate> evaluate;
+	std::optional<CoverMode> mode;
 };
 
 }; // namespace pir
